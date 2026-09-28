@@ -1,0 +1,71 @@
+# 01 — Python for AI
+
+Two weeks of focused Python, test-first. Each day has an exercise file with
+stubs/bugs and a test file that fails until you fix it. **Don't edit the tests.**
+
+## How to work
+
+```bash
+cd 01-python-for-ai
+uv sync                                   # one-time: create .venv and install pytest
+uv run pytest tests/test_day01_mutability.py -v   # run one day's tests
+uv run pytest                             # run everything
+```
+
+Workflow per exercise: read the docstring → run the test (red) → write code → test (green)
+→ write 2–3 lines in `notes/` about what surprised you.
+
+## Plan
+
+| Days | Topic | Exercise | Done |
+|------|-------|----------|------|
+| 1 | References, mutability, copies | `exercises/day01_mutability.py` | ✅ |
+| 2 | Class vs instance attrs, `@dataclass` | `exercises/day02_chat_history.py` | ✅ |
+| 3 | Pydantic basics: parse messy LLM JSON | `exercises/day03_pydantic_basics.py` | ☐ |
+| 4 | Validators, nested models, tool schema, retry feedback | `exercises/day04_pydantic_advanced.py` | ☐ |
+| 5–6 | `httpx`, error handling, retries | *coming next* | ☐ |
+| 7–8 | async `httpx.AsyncClient`, `asyncio.gather` | *coming next* | ☐ |
+| 9–10 | `uv`, project layout, `.env`, pytest fixtures | *coming next* | ☐ |
+| 11–14 | First LLM app: call, stream, structured output | *coming next* | ☐ |
+
+## Key concept for Days 1–2
+
+In Python, **variables are labels pointing to objects**, not boxes holding values.
+
+```python
+a = [1, 2]
+b = a          # b points to the SAME list
+b.append(3)
+print(a)       # [1, 2, 3]  ← a "changed" too
+```
+
+- Default argument values are evaluated **once**, when `def` runs — not on each call.
+- Attributes defined on the class body are **shared by all instances**.
+- `list(x)` / `x.copy()` make a **shallow** copy; nested objects are still shared.
+  `copy.deepcopy(x)` copies all the way down.
+
+## Key concept for Days 3–4
+
+A **dataclass** stores data. A **Pydantic model** stores data *and checks it* at runtime.
+
+```python
+class Ticket(BaseModel):
+    priority: int = Field(ge=1, le=5)
+
+Ticket(priority="3")    # OK  -> priority == 3   (safe conversion)
+Ticket(priority=9)      # ValidationError: Input should be less than or equal to 5
+```
+
+Why AI engineers use it everywhere: LLM output is **untrusted input**. Treat it like
+an API response you're testing — validate the shape before anything else touches it.
+
+| You want to... | Use |
+|---|---|
+| Declare types + limits | type hints + `Field(ge=, le=, min_length=, ...)` |
+| Restrict to fixed values | `Literal["a", "b"]` |
+| Parse a JSON string | `Model.model_validate_json(text)` |
+| Parse a dict | `Model.model_validate(data)` |
+| Clean/check one field | `@field_validator("name")` |
+| Check rules across fields | `@model_validator(mode="after")` |
+| Tell the LLM the shape | `Model.model_json_schema()` |
+| Tell the LLM what it got wrong | `ValidationError.errors()` |
