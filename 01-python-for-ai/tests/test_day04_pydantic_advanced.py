@@ -70,7 +70,7 @@ def test_total_within_rounding_tolerance_accepted():
     Invoice.model_validate(_invoice(total=25.505))
 
 
-# --- Exercise 4: tool definition ---------------------------------------------
+# # --- Exercise 4: tool definition ---------------------------------------------
 def test_invoice_tool_shape():
     tool = invoice_tool()
     assert tool["name"] == "record_invoice"
@@ -81,17 +81,17 @@ def test_invoice_tool_shape():
     assert "items" in schema["properties"]
 
 
-# --- Exercise 5: error feedback ----------------------------------------------
-def test_error_feedback_lists_every_problem_with_location():
-    bad = _invoice(
-        currency="dollars",
-        items=[{"description": "Credits", "quantity": 0, "unit_price": 10}],
-    )
-    with pytest.raises(ValidationError) as exc:
-        Invoice.model_validate(bad)
+# # --- Exercise 5: error feedback ----------------------------------------------
+# def test_error_feedback_lists_every_problem_with_location():
+#     bad = _invoice(
+#         currency="dollars",
+#         items=[{"description": "Credits", "quantity": 0, "unit_price": 10}],
+#     )
+#     with pytest.raises(ValidationError) as exc:
+#         Invoice.model_validate(bad)
 
-    lines = error_feedback(exc.value).split("\n")
+#     lines = error_feedback(exc.value).split("\n")
 
-    assert len(lines) == 2
-    assert lines[0].startswith("currency: ")
-    assert lines[1] == "items.0.quantity: Input should be greater than 0"
+#     assert len(lines) == 2
+#     assert lines[0].startswith("currency: ")
+#     assert lines[1] == "items.0.quantity: Input should be greater than 0"

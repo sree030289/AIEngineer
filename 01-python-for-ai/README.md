@@ -21,9 +21,10 @@ Workflow per exercise: read the docstring → run the test (red) → write code 
 |------|-------|----------|------|
 | 1 | References, mutability, copies | `exercises/day01_mutability.py` | ✅ |
 | 2 | Class vs instance attrs, `@dataclass` | `exercises/day02_chat_history.py` | ✅ |
-| 3 | Pydantic basics: parse messy LLM JSON | `exercises/day03_pydantic_basics.py` | ☐ |
+| 3 | Pydantic basics: parse messy LLM JSON | `exercises/day03_pydantic_basics.py` | ✅ |
 | 4 | Validators, nested models, tool schema, retry feedback | `exercises/day04_pydantic_advanced.py` | ☐ |
-| 5–6 | `httpx`, error handling, retries | *coming next* | ☐ |
+| 5 | `httpx` client, dependency injection, validating responses | `exercises/day05_http_client.py` | ✅ |
+| 6 | Retries: status classification, backoff, Retry-After | `exercises/day06_retries.py` | ☐ |
 | 7–8 | async `httpx.AsyncClient`, `asyncio.gather` | *coming next* | ☐ |
 | 9–10 | `uv`, project layout, `.env`, pytest fixtures | *coming next* | ☐ |
 | 11–14 | First LLM app: call, stream, structured output | *coming next* | ☐ |
@@ -69,3 +70,25 @@ an API response you're testing — validate the shape before anything else touch
 | Check rules across fields | `@model_validator(mode="after")` |
 | Tell the LLM the shape | `Model.model_json_schema()` |
 | Tell the LLM what it got wrong | `ValidationError.errors()` |
+
+## Key concept for Days 5–6
+
+Lesson first: `uv run python lessons/lesson3_httpx.py`
+
+| Postman | httpx |
+|---|---|
+| Collection base URL | `httpx.Client(base_url=...)` |
+| Auth / headers tab | `headers={"Authorization": "Bearer ..."}` |
+| Send | `client.get(path)` / `client.post(path, json=body)` |
+| Status / body | `response.status_code` / `response.json()` |
+| Test "status is 2xx" | `response.raise_for_status()` |
+
+**httpx never raises on 4xx/5xx by itself** — you call `raise_for_status()`.
+
+Two families of errors:
+- `httpx.HTTPStatusError` — the server answered with an error code (retry only 429/5xx/529)
+- `httpx.TransportError` — no answer at all: timeouts, connection failures (retry)
+
+**Dependency injection:** functions *receive* the `client` and the `sleep` function instead
+of creating them. Tests pass in fakes (`httpx.MockTransport`, a list's `.append`), so they run
+instantly and never touch the network.

@@ -59,8 +59,33 @@ class Invoice(BaseModel):
     #       ...
     #       return cleaned_value
 
+    @field_validator("currency")
+    @classmethod
+    def normalise_currency(cls,value:str) ->str:
+        cleaned_value :str
+        if value:
+            cleaned_value =value.strip().upper()
+            if len(cleaned_value) == 3 and cleaned_value.isalpha():
+                return cleaned_value
+        raise ValueError
+            
+
+            
+
+
     # TODO: add a @field_validator("invoice_number") that strips whitespace and
     #   raises ValueError unless it starts with "INV-".
+
+    @field_validator("invoice_number")
+    @classmethod
+    def normalise_invoice(cls,value:str) -> str:
+       
+            if value:
+                value = value.strip()
+                if value.startswith("INV-"):
+                    return value
+            raise ValueError('validation error')
+        
 
     # -----------------------------------------------------------------------
     # Exercise 3 — model_validator: rules across several fields
@@ -75,6 +100,17 @@ class Invoice(BaseModel):
     #   def check_total(self) -> "Invoice":
     #       ...
     #       return self
+
+    @model_validator(mode="after")
+    def check_total(self) -> "Invoice":
+        sumTotal = sum(item.amount for item in self.items)
+        if abs(self.total - sumTotal) > 0.01 :
+            raise ValueError
+        return self
+
+
+
+
 
 
 # ---------------------------------------------------------------------------
@@ -94,7 +130,12 @@ def invoice_tool() -> dict:
 
     Hint: Invoice.model_json_schema()
     """
-    raise NotImplementedError
+    return {
+                "name": "record_invoice",
+                "description": "Record the invoice extracted from the document.",
+                "input_schema": Invoice.model_json_schema(),
+            }
+
 
 
 # ---------------------------------------------------------------------------
@@ -114,4 +155,7 @@ def error_feedback(error: ValidationError) -> str:
     Hint: error.errors() returns a list of dicts with "loc" (a tuple — may
     contain ints, so convert with str()) and "msg" keys.
     """
+    lines =[]
+    for err in error.errors():
+        location = ".".join(str(part) for part in err["loc"])
     raise NotImplementedError

@@ -55,7 +55,7 @@ def test_tags_default_not_shared():
     assert b.tags == []
 
 
-# --- Exercise 2: extract_json -------------------------------------------------
+# # --- Exercise 2: extract_json -------------------------------------------------
 def test_extract_plain_json():
     assert extract_json(VALID) == VALID
 

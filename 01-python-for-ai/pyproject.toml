@@ -5,7 +5,9 @@ description = "Python fundamentals for AI engineering, practiced test-first"
 requires-python = ">=3.12"
 dependencies = [
     "fastapi[standard]>=0.141.1",
+    "httpx>=0.28.1",
     "pydantic>=2.13.5",
+    "regex>=2026.9.29",
 ]
 
 [dependency-groups]

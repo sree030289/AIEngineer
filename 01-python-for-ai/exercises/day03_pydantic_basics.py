@@ -15,7 +15,7 @@ from typing import Literal
 
 from pydantic import BaseModel, Field, ValidationError
 
-
+import re
 # ---------------------------------------------------------------------------
 # Exercise 1 — define the model
 # ---------------------------------------------------------------------------
@@ -31,6 +31,12 @@ class TicketClassification(BaseModel):
     Note: unlike a plain class or dataclass, `tags: list[str] = []` is SAFE in
     Pydantic — it copies the default for each instance. (Day 1 bug can't happen.)
     """
+    category: Literal["bug", "feature" , "question"]
+    priority:int = Field(ge=1, le=5)
+    summary: str = Field(min_length=5 , max_length=200)
+    tags: list[str] =[]
+
+
 
 
 # ---------------------------------------------------------------------------
@@ -49,7 +55,13 @@ def extract_json(raw: str) -> str:
 
     Hint: str.find() / str.rfind() return -1 when not found.
     """
-    raise NotImplementedError
+    start = raw.find('{')
+    end = raw.rfind('}')
+
+    if start == -1 or end < start:
+        raise ValueError("no JSON object found in LLM reply")
+    else:
+        return raw[start:end+1]
 
 
 # ---------------------------------------------------------------------------
@@ -61,7 +73,10 @@ def parse_classification(raw: str) -> TicketClassification:
     Let pydantic.ValidationError propagate if the data is invalid.
     Hint: TicketClassification.model_validate_json(...)
     """
-    raise NotImplementedError
+    json = extract_json(raw)
+    ticket = TicketClassification.model_validate_json(json)
+    return ticket 
+
 
 
 # ---------------------------------------------------------------------------
@@ -74,4 +89,7 @@ def safe_parse(raw: str) -> TicketClassification | None:
     Catch ONLY the specific exceptions you expect — no bare `except:`
     (remember the Day 1 review!).
     """
-    raise NotImplementedError
+    try:
+        return parse_classification(raw)
+    except (ValueError, ValidationError):
+        return None
