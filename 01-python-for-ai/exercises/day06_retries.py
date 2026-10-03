@@ -30,7 +30,7 @@ def classify_status(status_code: int) -> str:
       "retry"  for codes in RETRYABLE_STATUS
       "fail"   for everything else (400, 401, 404, 422, ...)
     """
-    if status_code in (200,201,204):
+    if 200 <= status_code < 300:          # any 2xx, not just 200/201/204
         return "ok"
     elif status_code in RETRYABLE_STATUS:
         return "retry"
@@ -50,8 +50,9 @@ def backoff_delay(attempt: int, base: float = 1.0, cap: float = 30.0) -> float:
     (Real systems also add random "jitter" so thousands of clients don't all
     retry at the same instant. We skip it here to keep tests deterministic.)
     """
-    
-    
+    # 2 ** attempt doubles each time: 1, 2, 4, 8, 16, 32...
+    # min() picks the smaller value, so the wait never goes above `cap`.
+    return min(base * 2 ** attempt, cap)
 
 
 # ---------------------------------------------------------------------------
@@ -65,7 +66,13 @@ def retry_after_seconds(response: httpx.Response) -> float | None:
 
     Hint: response.headers.get("Retry-After"); float("abc") raises ValueError.
     """
-    raise NotImplementedError
+    value = response.headers.get("Retry-After")   # None if the header is missing
+    if value is None:
+        return None
+    try:
+        return float(value)                        # "5" -> 5.0, "0.5" -> 0.5
+    except ValueError:                             # "Wed, 21 Oct..." isn't a number
+        return None
 
 
 # ---------------------------------------------------------------------------
@@ -98,4 +105,25 @@ def request_with_retry(
 
     Tip: `raise` on its own inside an `except` block re-raises the caught error.
     """
-    raise NotImplementedError
+    for attempt in range(max_attempts):
+        is_last_attempt = attempt == max_attempts - 1
+
+        # 1. Send. Network-level failures (timeout, connection refused) raise.
+        try:
+            response = client.request(method, url, **kwargs)
+        except httpx.TransportError:
+            if is_last_attempt:
+                raise                              # out of attempts: re-raise the same error
+            sleep(backoff_delay(attempt))          # no response, so no Retry-After to read
+            continue                               # jump to the next loop iteration
+
+        # 2. The server answered. Decide what to do with its status code.
+        outcome = classify_status(response.status_code)
+        if outcome == "ok":
+            return response
+        if outcome == "fail" or is_last_attempt:
+            response.raise_for_status()            # 4xx, or retries used up -> HTTPStatusError
+
+        # 3. Temporary failure: wait, then loop again.
+        server_wait = retry_after_seconds(response)
+        sleep(server_wait if server_wait is not None else backoff_delay(attempt))

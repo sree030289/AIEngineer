@@ -24,9 +24,11 @@ Workflow per exercise: read the docstring → run the test (red) → write code 
 | 3 | Pydantic basics: parse messy LLM JSON | `exercises/day03_pydantic_basics.py` | ✅ |
 | 4 | Validators, nested models, tool schema, retry feedback | `exercises/day04_pydantic_advanced.py` | ☐ |
 | 5 | `httpx` client, dependency injection, validating responses | `exercises/day05_http_client.py` | ✅ |
-| 6 | Retries: status classification, backoff, Retry-After | `exercises/day06_retries.py` | ☐ |
-| 7–8 | async `httpx.AsyncClient`, `asyncio.gather` | *coming next* | ☐ |
-| 9–10 | `uv`, project layout, `.env`, pytest fixtures | *coming next* | ☐ |
+| 6 | Retries: status classification, backoff, Retry-After | `exercises/day06_retries.py` | ✅ |
+| 7 | async basics: `await`, `gather`, timeouts, partial failures | `exercises/day07_async_basics.py` | ☐ |
+| 8 | Rate-limited batch LLM classification + async retries | `exercises/day08_async_llm_batch.py` | ☐ |
+| 9 | Env vars, `.env`, secrets, `pydantic-settings` | `exercises/day09_config.py` | ☐ |
+| 10 | pytest fixtures (`conftest.py`), `tmp_path`, `monkeypatch`, ruff | `tests/conftest.py` | ☐ |
 | 11–14 | First LLM app: call, stream, structured output | *coming next* | ☐ |
 
 ## Key concept for Days 1–2
@@ -92,3 +94,45 @@ Two families of errors:
 **Dependency injection:** functions *receive* the `client` and the `sleep` function instead
 of creating them. Tests pass in fakes (`httpx.MockTransport`, a list's `.append`), so they run
 instantly and never touch the network.
+
+## Key concept for Days 7–8
+
+Lesson first: `uv run python lessons/lesson4_async.py`
+
+| JavaScript | Python |
+|---|---|
+| `async function f()` | `async def f():` |
+| `await f()` | `await f()` |
+| `await Promise.all([a(), b()])` | `await asyncio.gather(a(), b())` |
+| `Promise.allSettled` | `asyncio.gather(..., return_exceptions=True)` |
+| (top-level await) | `asyncio.run(main())` — the one bridge from sync to async |
+
+- Async helps when code **waits** (HTTP, LLM calls) — not for heavy computation.
+- Forgetting `await` gives you a *coroutine object*, and nothing runs.
+- Inside async code use `asyncio.sleep`, never `time.sleep` (it freezes everything).
+- `asyncio.Semaphore(n)` = max `n` at a time — how you stay under API rate limits.
+- `asyncio.wait_for(x, timeout=s)` = give up after `s` seconds.
+
+## Key concept for Days 9–10
+
+**Day 9 — secrets never go in code.** Live demo: `uv run python lessons/lesson6_config_secrets.py`
+
+- An environment variable is named text that lives outside your code. It is always a string.
+- `os.environ["X"]` crashes if missing; `os.environ.get("X")` returns `None`.
+- Put real keys in `.env` (git-ignored). Commit only `.env.example` with fake values.
+- `pydantic-settings` reads, converts and validates all config in one class.
+- `SecretStr` hides a value when printed; `.get_secret_value()` reveals it on purpose.
+- Priority: argument > real env var > `.env` file > default.
+
+**Day 10 — fixtures.** Live demo: `uv run pytest lessons/test_lesson7_fixtures_demo.py -v -s`
+
+- A fixture is a function that prepares something; a test asks for it by naming it as a parameter.
+- Each test gets a fresh copy. Fixtures can use other fixtures. Shared ones live in `conftest.py`.
+- `yield` inside a fixture = setup before, cleanup after (runs even if the test fails).
+- Built-ins: `tmp_path` (temp folder), `monkeypatch` (temporary changes, auto-undone).
+
+**Ruff** (linter + formatter): `uv run ruff check .` finds problems, `uv run ruff check . --fix`
+fixes the safe ones, `uv run ruff format .` reformats. Config is in `pyproject.toml`.
+
+**uv cheat sheet:** `uv sync` (install from lockfile) · `uv add pkg` (add a dependency) ·
+`uv add --dev pkg` (dev-only) · `uv run cmd` (run inside the project's environment).

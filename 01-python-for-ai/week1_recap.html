@@ -1,0 +1,1272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Week 1 Python Notes</title>
+<style>
+  :root {
+    --bg: #f6f7f9; --surface: #ffffff; --text: #16202b; --muted: #5b6776;
+    --border: #dfe3e8; --accent: #1f6feb; --code-bg: #eef1f5; --run-bg: #e6f0ff; --comment: #2a6f2e;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0e141b; --surface: #161e28; --text: #e6ebf1; --muted: #98a4b3;
+      --border: #263241; --accent: #6aa6ff; --code-bg: #1d2733; --run-bg: #14253d; --comment: #86d493;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0e141b; --surface: #161e28; --text: #e6ebf1; --muted: #98a4b3;
+    --border: #263241; --accent: #6aa6ff; --code-bg: #1d2733; --run-bg: #14253d; --comment: #86d493;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text);
+         font: 16px/1.55 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+  .wrap { max-width: 1040px; margin: 0 auto; padding: 32px 16px 64px; }
+  h1 { font-size: 2rem; line-height: 1.2; margin: 0 0 6px; }
+  h2 { font-size: 1.25rem; margin: 40px 0 14px; }
+  h3 { font-size: 1.1rem; margin: 2px 0 8px; }
+  h4 { font-size: 0.78rem; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); margin: 14px 0 6px; }
+  p { margin: 0 0 8px; }
+  .sub { color: var(--muted); margin-bottom: 20px; }
+  code { background: var(--code-bg); padding: 1px 6px; border-radius: 5px; font: 0.88em ui-monospace, Menlo, Consolas, monospace; }
+
+  .tabs { display: none; gap: 8px; margin: 0 0 22px; border-bottom: 1px solid var(--border); }
+  .js .tabs { display: flex; }
+  .tab { appearance: none; background: none; border: 0; border-bottom: 3px solid transparent; color: var(--muted);
+         font: inherit; font-weight: 600; padding: 10px 14px; min-height: 44px; cursor: pointer; margin-bottom: -1px; }
+  .tab[aria-selected="true"] { color: var(--accent); border-bottom-color: var(--accent); }
+  .tab:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 6px; }
+
+  .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 440px), 1fr)); gap: 16px; }
+  .pygrid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; }
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 18px; min-width: 0; }
+  .tag { font-size: 0.78rem; font-weight: 700; color: var(--accent); text-transform: uppercase; letter-spacing: .05em; }
+  .covers { color: var(--muted); }
+  ul { margin: 0; padding-left: 18px; }
+  li { margin-bottom: 5px; }
+  pre { margin: 0; background: var(--code-bg); border-radius: 8px; padding: 12px 14px; overflow-x: auto; }
+  pre code { background: none; padding: 0; font-size: 0.82rem; line-height: 1.55; }
+  pre.run { background: var(--run-bg); }
+  .c { color: var(--comment); }
+  .filter { width: 100%; max-width: 420px; font: inherit; padding: 10px 12px; min-height: 44px; color: var(--text);
+            background: var(--surface); border: 1px solid var(--border); border-radius: 8px; margin-bottom: 16px; }
+  .filter:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+  .none { color: var(--muted); display: none; }
+  [hidden] { display: none !important; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Week 1 · Python for AI Engineering</h1>
+  <p class="sub">Run every command from <code>~/AIEngineer/01-python-for-ai</code>.</p>
+
+  <div class="tabs" role="tablist" aria-label="Sections">
+    <button class="tab" role="tab" id="tab-notes" data-tab="notes" aria-controls="panel-notes" aria-selected="true">Week 1 notes</button>
+    <button class="tab" role="tab" id="tab-python" data-tab="python" aria-controls="panel-python" aria-selected="false" tabindex="-1">Python cheat sheet</button>
+  </div>
+
+  <div id="panel-notes" role="tabpanel" aria-labelledby="tab-notes">
+    <p class="sub">What each day covers, what to remember, and the commands.</p>
+    <div class="cards">
+      <section class="card">
+        <div class="tag">Day 1</div>
+        <h3>References & mutability</h3>
+        <p class="covers">A Python variable is a label pointing to an object, not a box holding a value. This is why shared state causes bugs.</p>
+        <h4>Remember</h4>
+        <ul><li><code>def f(x=[])</code> creates the list <b>once</b>, shared by every call. Use <code>None</code> as the default.</li><li>A list written in the class body is shared by <b>all</b> objects. Create it in <code>__init__</code>.</li><li><code>.copy()</code> is shallow (nested data still shared); <code>copy.deepcopy()</code> copies everything.</li><li>Catch only the error you expect. A bare <code>except:</code> hides real bugs.</li></ul>
+        <h4>Code</h4>
+        <pre><code>def add_tag(tag, tags=None):
+    if tags is None:
+        tags = []              <span class="c"># fresh list on every call</span>
+    tags.append(tag)
+    return tags
+
+self.messages = []             <span class="c"># in __init__, never in the class body</span>
+new_config = copy.deepcopy(base)
+new_list = items + [item]      <span class="c"># new list, original untouched</span></code></pre>
+        <h4>Run</h4>
+        <pre class="run"><code>uv run pytest tests/test_day01_mutability.py -v</code></pre>
+      </section>
+      <section class="card">
+        <div class="tag">Day 2</div>
+        <h3>Dataclasses & chat history</h3>
+        <p class="covers">LLMs have no memory: every call resends the whole conversation. You build the object that holds it.</p>
+        <h4>Remember</h4>
+        <ul><li><code>field(default_factory=list)</code> gives each dataclass its own list.</li><li>Roles must alternate user, assistant, user. The assistant can't speak first.</li><li><code>list[-1]</code> is the last item; <code>list[-n:]</code> is the last n. Careful: <code>list[-0:]</code> is the whole list.</li><li>API payload shape: a <code>system</code> string plus a list of <code>{role, content}</code> dicts.</li></ul>
+        <h4>Code</h4>
+        <pre><code>@dataclass
+class ChatHistory:
+    system: str
+    messages: list[Message] = field(default_factory=list)
+
+if self.messages and self.messages[-1].role == "user":
+    raise ValueError("two user messages in a row")
+
+{"system": "...", "messages": [{"role": "user", "content": "hi"}]}</code></pre>
+        <h4>Run</h4>
+        <pre class="run"><code>uv run pytest tests/test_day02_chat_history.py -v</code></pre>
+      </section>
+      <section class="card">
+        <div class="tag">Lesson</div>
+        <h3>Pydantic: type hints that are enforced</h3>
+        <p class="covers">A Pydantic model checks data when it is created, converts safe values (<code>"3"</code> becomes <code>3</code>), and reports every error at once.</p>
+        <h4>Remember</h4>
+        <ul><li><code>Literal[...]</code> limits a field to fixed values; <code>Field(ge=, le=, min_length=)</code> adds limits.</li><li>Nested models are validated all the way down; errors point to the exact spot, like <code>items.0.quantity</code>.</li><li>A field with a default and limits: the default goes <b>inside</b> <code>Field(default=3, ge=0, le=10)</code>.</li></ul>
+        <h4>Code</h4>
+        <pre><code>class Ticket(BaseModel):
+    category: Literal["bug", "feature", "question"]
+    priority: int = Field(ge=1, le=5)
+    summary: str = Field(min_length=5)
+    tags: list[str] = []
+
+Ticket.model_validate_json(text)    <span class="c"># JSON string -&gt; object</span>
+Ticket.model_validate(data)         <span class="c"># dict -&gt; object</span>
+ticket.model_dump()                 <span class="c"># object -&gt; dict</span>
+ticket.model_dump_json()            <span class="c"># object -&gt; JSON string</span>
+Ticket.model_json_schema()          <span class="c"># the model describes itself</span></code></pre>
+        <h4>Run</h4>
+        <pre class="run"><code>uv run python lessons/lesson1_pydantic.py</code></pre>
+      </section>
+      <section class="card">
+        <div class="tag">Lesson</div>
+        <h3>FastAPI: your models are the API contract</h3>
+        <p class="covers">Build an API where Pydantic models define the request and response. Validation, errors and docs come free.</p>
+        <h4>Remember</h4>
+        <ul><li>A model parameter is read from the <b>body</b>; a <code>{name}</code> in the route is the <b>path</b>; anything else is the <b>query</b>.</li><li>Invalid input gets an automatic <b>422</b>. Your own errors: <code>raise HTTPException(404, ...)</code>.</li><li><code>TestClient</code> tests the app in-process, like Playwright's <code>request</code> fixture.</li></ul>
+        <h4>Code</h4>
+        <pre><code>@app.post("/tickets", status_code=201)
+def create_ticket(ticket: TicketIn) -&gt; TicketOut: ...
+
+@app.get("/tickets/{ticket_id}")
+def get_ticket(ticket_id: int) -&gt; TicketOut: ...
+
+client = TestClient(app)
+assert client.post("/tickets", json=body).status_code == 201</code></pre>
+        <h4>Run</h4>
+        <pre class="run"><code>uv run fastapi dev lessons/lesson2_fastapi.py    <span class="c"># then open http://127.0.0.1:8000/docs</span>
+uv run pytest lessons/ -v</code></pre>
+      </section>
+      <section class="card">
+        <div class="tag">Day 3</div>
+        <h3>Parsing messy LLM output</h3>
+        <p class="covers">LLM replies wrap JSON in chatty text. Cut the JSON out, validate it, and never crash on a bad reply.</p>
+        <h4>Remember</h4>
+        <ul><li>LLM output is <b>untrusted input</b>. Validate it before anything else uses it.</li><li><code>str.find()</code> and <code>rfind()</code> return -1 when not found.</li><li><code>except (ValueError, ValidationError)</code> catches exactly the two errors you expect.</li></ul>
+        <h4>Code</h4>
+        <pre><code>start = raw.find("{")
+end = raw.rfind("}")
+if start == -1 or end &lt; start:
+    raise ValueError("no JSON object found")
+return raw[start:end + 1]
+
+try:
+    return parse_classification(raw)
+except (ValueError, ValidationError):
+    return None</code></pre>
+        <h4>Run</h4>
+        <pre class="run"><code>uv run pytest tests/test_day03_pydantic_basics.py -v</code></pre>
+      </section>
+      <section class="card">
+        <div class="tag">Day 4</div>
+        <h3>Validators, nested models, tool schema</h3>
+        <p class="covers">Rules beyond types, and feeding errors back to the LLM so it can retry.</p>
+        <h4>Remember</h4>
+        <ul><li><code>@field_validator</code>: <b>clean, check, return</b>. Inside it, <code>raise ValueError(...)</code>; Pydantic wraps it.</li><li>Strings are immutable: <code>value = value.strip()</code>, not just <code>value.strip()</code>.</li><li>Never compare money floats with <code>==</code>. Use <code>abs(a - b) &gt; 0.01</code>.</li><li><code>model_json_schema()</code> becomes the tool definition you give the LLM.</li></ul>
+        <h4>Code</h4>
+        <pre><code>@field_validator("currency")
+@classmethod
+def clean(cls, value: str) -&gt; str:
+    value = value.strip().upper()                          <span class="c"># clean</span>
+    if len(value) != 3 or not value.isalpha():
+        raise ValueError("currency must be 3 letters")     <span class="c"># check</span>
+    return value                                           <span class="c"># return</span>
+
+@model_validator(mode="after")
+def check_total(self):
+    if abs(sum(i.amount for i in self.items) - self.total) &gt; 0.01:
+        raise ValueError("total does not match the items")
+    return self
+
+".".join(str(part) for part in err["loc"])   <span class="c"># "items.0.quantity"</span></code></pre>
+        <h4>Run</h4>
+        <pre class="run"><code>uv run pytest tests/test_day04_pydantic_advanced.py -v</code></pre>
+      </section>
+      <section class="card">
+        <div class="tag">Day 5</div>
+        <h3>httpx: calling APIs from Python</h3>
+        <p class="covers">Postman in code. Every LLM call is an HTTP request.</p>
+        <h4>Remember</h4>
+        <ul><li>httpx does <b>not</b> raise on 4xx/5xx. Call <code>raise_for_status()</code>.</li><li>Two error families: <code>HTTPStatusError</code> (server answered with an error) and <code>TransportError</code> (no answer: timeout, connection).</li><li>Pass the client into your functions (dependency injection) so tests can use <code>MockTransport</code> instead of the network.</li><li>When "not found" is normal, check <code>status_code == 404</code> <b>before</b> <code>raise_for_status()</code>.</li><li>Always set a timeout.</li></ul>
+        <h4>Code</h4>
+        <pre><code>client = httpx.Client(base_url="https://api.example.com",
+                      headers={"Authorization": f"Bearer {key}"},
+                      timeout=10.0)
+response = client.get("/users/1")
+response.raise_for_status()
+data = response.json()
+client.post("/users", json={"name": "Asha"})</code></pre>
+        <h4>Run</h4>
+        <pre class="run"><code>uv run python lessons/lesson3_httpx.py
+uv run pytest tests/test_day05_http_client.py -v</code></pre>
+      </section>
+      <section class="card">
+        <div class="tag">Day 6</div>
+        <h3>Retries with backoff</h3>
+        <p class="covers">Which failures to retry, how long to wait, and how to test it without really waiting.</p>
+        <h4>Remember</h4>
+        <ul><li>Retry <b>429, 500, 502, 503, 504, 529</b> and timeouts. <b>Never</b> retry 400, 401, 403, 404, 422.</li><li>Wait 1s, 2s, 4s, 8s… capped. If the server sends <code>Retry-After</code>, use that instead.</li><li>Pass <code>sleep</code> in as a parameter so tests record the wait instead of waiting.</li><li>A bare <code>raise</code> inside <code>except</code> re-raises the same error. Use <code>is None</code>, not truthiness, when 0 is valid.</li></ul>
+        <h4>Code</h4>
+        <pre><code>if 200 &lt;= status_code &lt; 300: return "ok"
+return min(base * 2 ** attempt, cap)       <span class="c"># backoff</span>
+
+for attempt in range(max_attempts):
+    is_last_attempt = attempt == max_attempts - 1
+    try:
+        response = client.request(method, url, **kwargs)
+    except httpx.TransportError:
+        if is_last_attempt:
+            raise
+        sleep(backoff_delay(attempt))
+        continue</code></pre>
+        <h4>Run</h4>
+        <pre class="run"><code>uv run pytest tests/test_day06_retries.py -v</code></pre>
+      </section>
+      <section class="card">
+        <div class="tag">Day 7</div>
+        <h3>Async: waiting without being stuck</h3>
+        <p class="covers">Run many slow calls at the same time. 10 requests take about the time of one.</p>
+        <h4>Remember</h4>
+        <ul><li>An <code>async def</code> function <b>does not run</b> until you <code>await</code> it. Without <code>await</code> you get <code>&lt;coroutine object&gt;</code>.</li><li>Only the slow call (network, sleep) gets <code>await</code>. <code>.json()</code> and <code>raise_for_status()</code> don't.</li><li><code>asyncio.gather</code> runs all together and returns results in <b>input order</b>.</li><li>Use <code>asyncio.sleep</code>, never <code>time.sleep</code>, inside async code.</li><li>If a result shows <code>&lt;coroutine&gt;</code> or <code>&lt;Future&gt;</code>, an <code>await</code> is missing.</li></ul>
+        <h4>Code</h4>
+        <pre><code>async def fetch_json(client, path):
+    response = await client.get(path)     <span class="c"># the slow call: await</span>
+    response.raise_for_status()
+    return response.json()
+
+results = await asyncio.gather(*(fetch_json(client, p) for p in paths))
+results = await asyncio.gather(*coros, return_exceptions=True)   <span class="c"># errors as values</span>
+result = await asyncio.wait_for(coro, timeout=5)                 <span class="c"># raises TimeoutError</span>
+asyncio.run(main())                                              <span class="c"># start the program</span></code></pre>
+        <h4>Run</h4>
+        <pre class="run"><code>uv run python lessons/lesson4_async.py
+uv run python lessons/lesson4b_asyncio_actions.py
+uv run pytest tests/test_day07_async_basics.py -v</code></pre>
+      </section>
+      <section class="card">
+        <div class="tag">Day 8</div>
+        <h3>Async at scale: limits and batches</h3>
+        <p class="covers">Run many LLM calls, but only N at a time, so you stay under the API's rate limit.</p>
+        <h4>Remember</h4>
+        <ul><li><code>gather</code> starts <b>everything</b>; the <b>semaphore</b> is what limits how many run at once.</li><li>A task is a function that makes a coroutine: <code>lambda: classify(text)</code>. Calling it gives a fresh coroutine each time.</li><li>Lambda-in-a-loop trap: use <code>lambda t=text: ...</code> so each one keeps its own value.</li><li>One bad item must not stop the batch: catch the expected errors and return <code>None</code>.</li></ul>
+        <h4>Code</h4>
+        <pre><code>semaphore = asyncio.Semaphore(limit)
+
+async def run_one(task):
+    async with semaphore:
+        return await task()
+
+return await asyncio.gather(*(run_one(t) for t in tasks))
+
+tasks = [lambda t=text: one(t) for text in texts]</code></pre>
+        <h4>Run</h4>
+        <pre class="run"><code>uv run python lessons/lesson5_day8_walkthrough.py</code></pre>
+      </section>
+      <section class="card">
+        <div class="tag">Day 9</div>
+        <h3>Config & secrets</h3>
+        <p class="covers">API keys never go in code or git. They live in environment variables or a git-ignored <code>.env</code> file.</p>
+        <h4>Remember</h4>
+        <ul><li>An environment variable is always a string. <code>os.environ.get("X")</code> returns <code>None</code> if missing; <code>os.environ["X"]</code> crashes.</li><li>Commit <code>.env.example</code> (fake values). <code>.env</code> stays git-ignored.</li><li>In a <code>Settings</code> class you only <b>declare</b> fields; <code>pydantic-settings</code> fetches, converts and validates.</li><li>A field with no default is required. <code>SecretStr</code> hides the value when printed.</li><li>Priority: argument, then real env var, then <code>.env</code> file, then default.</li></ul>
+        <h4>Code</h4>
+        <pre><code>class Settings(BaseSettings):
+    model_config = SettingsConfigDict(env_file=".env", extra="ignore")
+
+    anthropic_api_key: SecretStr                         <span class="c"># required</span>
+    llm_model: str = "claude-sonnet-5"                   <span class="c"># default</span>
+    max_retries: int = Field(default=3, ge=0, le=10)     <span class="c"># default + limits</span>
+
+settings = Settings()
+settings.anthropic_api_key.get_secret_value()            <span class="c"># reveal on purpose</span></code></pre>
+        <h4>Run</h4>
+        <pre class="run"><code>uv run python lessons/lesson6_config_secrets.py
+uv run pytest tests/test_day09_config.py -v</code></pre>
+      </section>
+      <section class="card">
+        <div class="tag">Day 10</div>
+        <h3>pytest fixtures</h3>
+        <p class="covers">A fixture prepares what a test needs. A test asks for it by naming it as a parameter. (Only works in pytest.)</p>
+        <h4>Remember</h4>
+        <ul><li>Each test gets a <b>fresh</b> copy, so tests can't affect each other.</li><li>A fixture can use another fixture (add it as a parameter). Shared fixtures live in <code>conftest.py</code>.</li><li><code>yield</code> splits a fixture into setup and cleanup; cleanup runs even if the test fails.</li><li>Built-ins: <code>tmp_path</code> (temporary folder) and <code>monkeypatch</code> (temporary changes, undone automatically).</li></ul>
+        <h4>Code</h4>
+        <pre><code>@pytest.fixture
+def store():
+    return TicketStore()
+
+@pytest.fixture
+def loaded_store(store):          <span class="c"># uses the store fixture</span>
+    store.add(Ticket(1, "bug", "Login crash"))
+    return store
+
+def test_x(loaded_store, tmp_path, monkeypatch):
+    monkeypatch.setenv("ANTHROPIC_API_KEY", "sk-test-123")</code></pre>
+        <h4>Run</h4>
+        <pre class="run"><code>uv run pytest lessons/test_lesson7_fixtures_demo.py -v -s</code></pre>
+      </section>
+    </div>
+
+    <h2>Command cheat sheet</h2>
+    <pre><code>cd ~/AIEngineer/01-python-for-ai         <span class="c"># run every command from this folder</span>
+
+uv sync                                  <span class="c"># install what pyproject.toml lists</span>
+uv add &lt;package&gt;                         <span class="c"># add a dependency</span>
+uv add --dev &lt;package&gt;                   <span class="c"># add a dev-only dependency</span>
+uv run python lessons/&lt;file&gt;.py          <span class="c"># run a script inside the project environment</span>
+
+uv run pytest                            <span class="c"># all tests</span>
+uv run pytest tests/&lt;file&gt;.py -v         <span class="c"># one file, verbose</span>
+uv run pytest tests/&lt;file&gt;.py -x         <span class="c"># stop at the first failure</span>
+uv run pytest tests/&lt;file&gt;.py -k name    <span class="c"># only tests whose name contains "name"</span>
+
+uv run ruff check .                      <span class="c"># find problems (changes nothing)</span>
+uv run ruff check . --fix                <span class="c"># fix the safe ones</span>
+uv run ruff format .                     <span class="c"># reformat</span>
+
+git add -A &amp;&amp; git commit -m "message" &amp;&amp; git push</code></pre>
+    <p class="sub" style="margin-top:10px">A test file is run with <code>pytest</code>, not <code>python</code>.</p>
+  </div>
+
+  <div id="panel-python" role="tabpanel" aria-labelledby="tab-python">
+    <p class="sub">General Python to keep handy. Every example was run, and each <code>-&gt; result</code> comment is what Python really returns.</p>
+    <input class="filter" id="filter" type="search" placeholder="Filter, e.g. dict, regex, file…" aria-label="Filter the cheat sheet">
+    <p class="none" id="none">Nothing matches.</p>
+    <div class="pygrid">
+      <section class="card pycard" data-search="variables &amp; types name = &quot;sree&quot;             # str   - text
+age = 30                  # int   - whole number
+price = 9.99              # float - decimal number
+active = true             # bool  - true / false (capital first letter)
+nothing = none            # none  - &quot;no value&quot; (test it with `is none`)
+
+type(age)                 # what type is it? -&gt; &lt;class &#x27;int&#x27;&gt;
+isinstance(age, int)      # is it this type? -&gt; true
+int(&quot;42&quot;)                 # text to int -&gt; 42
+float(&quot;3.5&quot;)              # text to float -&gt; 3.5
+str(100)                  # anything to text -&gt; &#x27;100&#x27;
+bool(0)                   # 0, &quot;&quot;, [], {}, none are all &quot;falsy&quot; -&gt; false
+10 // 3                   # floor division -&gt; 3
+10 % 3                    # remainder -&gt; 1
+2 ** 10                   # power -&gt; 1024">
+        <h3>Variables &amp; types</h3>
+        <pre><code>name = "Sree"             <span class="c"># str   - text</span>
+age = 30                  <span class="c"># int   - whole number</span>
+price = 9.99              <span class="c"># float - decimal number</span>
+active = True             <span class="c"># bool  - True / False (capital first letter)</span>
+nothing = None            <span class="c"># None  - "no value" (test it with `is None`)</span>
+
+type(age)                 <span class="c"># what type is it? -&gt; &lt;class 'int'&gt;</span>
+isinstance(age, int)      <span class="c"># is it this type? -&gt; True</span>
+int("42")                 <span class="c"># text to int -&gt; 42</span>
+float("3.5")              <span class="c"># text to float -&gt; 3.5</span>
+str(100)                  <span class="c"># anything to text -&gt; '100'</span>
+bool(0)                   <span class="c"># 0, "", [], {}, None are all "falsy" -&gt; False</span>
+10 // 3                   <span class="c"># floor division -&gt; 3</span>
+10 % 3                    <span class="c"># remainder -&gt; 1</span>
+2 ** 10                   <span class="c"># power -&gt; 1024</span></code></pre>
+      </section>
+      <section class="card pycard" data-search="strings s = &quot;  hello, world  &quot;
+name = &quot;sree&quot;
+age = 30
+price = 9.99
+s.strip()                  # trim both ends (returns a new string) -&gt; &#x27;hello, world&#x27;
+s.lower()                  # lowercase (also .upper()) -&gt; &#x27;  hello, world  &#x27;
+&quot;a,b,c&quot;.split(&quot;,&quot;)         # text to list -&gt; [&#x27;a&#x27;, &#x27;b&#x27;, &#x27;c&#x27;]
+&quot;-&quot;.join([&quot;a&quot;, &quot;b&quot;])       # list to text (items must be str) -&gt; &#x27;a-b&#x27;
+&quot;hello&quot;.replace(&quot;l&quot;, &quot;l&quot;)  # replace every match -&gt; &#x27;hello&#x27;
+&quot;hello&quot;.startswith(&quot;he&quot;)   # also .endswith() -&gt; true
+&quot;hello&quot;.find(&quot;l&quot;)          # index of first match, -1 if none -&gt; 2
+&quot;hello&quot;[1:3]               # slice [start:end], end excluded -&gt; &#x27;el&#x27;
+&quot;hello&quot;[-1]                # last character -&gt; &#x27;o&#x27;
+&quot;ell&quot; in &quot;hello&quot;           # contains? -&gt; true
+len(&quot;hello&quot;)               # length -&gt; 5
+&quot;12&quot;.isdigit()             # only digits? (also .isalpha()) -&gt; true
+f&quot;{name} is {age}&quot;         # f-string: put variables inside {} -&gt; &#x27;sree is 30&#x27;
+f&quot;{price:.1f}&quot;             # format to 1 decimal place -&gt; &#x27;10.0&#x27;">
+        <h3>Strings</h3>
+        <pre><code>s = "  Hello, World  "
+name = "Sree"
+age = 30
+price = 9.99
+s.strip()                  <span class="c"># trim both ends (returns a NEW string) -&gt; 'Hello, World'</span>
+s.lower()                  <span class="c"># lowercase (also .upper()) -&gt; '  hello, world  '</span>
+"a,b,c".split(",")         <span class="c"># text to list -&gt; ['a', 'b', 'c']</span>
+"-".join(["a", "b"])       <span class="c"># list to text (items must be str) -&gt; 'a-b'</span>
+"hello".replace("l", "L")  <span class="c"># replace every match -&gt; 'heLLo'</span>
+"hello".startswith("he")   <span class="c"># also .endswith() -&gt; True</span>
+"hello".find("l")          <span class="c"># index of first match, -1 if none -&gt; 2</span>
+"hello"[1:3]               <span class="c"># slice [start:end], end excluded -&gt; 'el'</span>
+"hello"[-1]                <span class="c"># last character -&gt; 'o'</span>
+"ell" in "hello"           <span class="c"># contains? -&gt; True</span>
+len("hello")               <span class="c"># length -&gt; 5</span>
+"12".isdigit()             <span class="c"># only digits? (also .isalpha()) -&gt; True</span>
+f"{name} is {age}"         <span class="c"># f-string: put variables inside {} -&gt; 'Sree is 30'</span>
+f"{price:.1f}"             <span class="c"># format to 1 decimal place -&gt; '10.0'</span></code></pre>
+      </section>
+      <section class="card pycard" data-search="lists  (ordered, changeable) nums = [3, 1, 2]
+nums.append(4)             # add one item to the end
+nums.extend([5, 6])        # add many items
+nums.insert(0, 9)          # insert at position 0
+nums.pop()                 # remove and return the last item -&gt; 6
+nums.remove(9)             # remove the first item with this value
+len(nums)                  # how many items -&gt; 5
+sorted(nums)               # new sorted list, original unchanged -&gt; [1, 2, 3, 4, 5]
+nums.sort(reverse=true)    # sort in place (returns none)
+nums                       # now sorted high to low -&gt; [5, 4, 3, 2, 1]
+nums[0]                    # first item -&gt; 5
+nums[-1]                   # last item -&gt; 1
+nums[1:3]                  # slice [start:end] -&gt; [4, 3]
+nums[::-1]                 # reversed copy -&gt; [1, 2, 3, 4, 5]
+3 in nums                  # is it in the list? -&gt; true
+nums.index(3)              # position of the first match -&gt; 2
+[n * 2 for n in nums]      # list comprehension -&gt; [10, 8, 6, 4, 2]
+[n for n in nums if n % 2 == 0]   # comprehension with a filter -&gt; [4, 2]
+first, *rest = nums        # unpack: first item + everything else
+rest                       # -&gt; [4, 3, 2, 1]
+for i, n in enumerate(nums):      # index and value together
+    pass
+list(zip([1, 2], [&quot;a&quot;, &quot;b&quot;]))     # pair items up -&gt; [(1, &#x27;a&#x27;), (2, &#x27;b&#x27;)]
+nums.copy()                # shallow copy (nested items still shared) -&gt; [5, 4, 3, 2, 1]">
+        <h3>Lists  (ordered, changeable)</h3>
+        <pre><code>nums = [3, 1, 2]
+nums.append(4)             <span class="c"># add one item to the end</span>
+nums.extend([5, 6])        <span class="c"># add many items</span>
+nums.insert(0, 9)          <span class="c"># insert at position 0</span>
+nums.pop()                 <span class="c"># remove AND return the last item -&gt; 6</span>
+nums.remove(9)             <span class="c"># remove the first item with this value</span>
+len(nums)                  <span class="c"># how many items -&gt; 5</span>
+sorted(nums)               <span class="c"># NEW sorted list, original unchanged -&gt; [1, 2, 3, 4, 5]</span>
+nums.sort(reverse=True)    <span class="c"># sort IN PLACE (returns None)</span>
+nums                       <span class="c"># now sorted high to low -&gt; [5, 4, 3, 2, 1]</span>
+nums[0]                    <span class="c"># first item -&gt; 5</span>
+nums[-1]                   <span class="c"># last item -&gt; 1</span>
+nums[1:3]                  <span class="c"># slice [start:end] -&gt; [4, 3]</span>
+nums[::-1]                 <span class="c"># reversed copy -&gt; [1, 2, 3, 4, 5]</span>
+3 in nums                  <span class="c"># is it in the list? -&gt; True</span>
+nums.index(3)              <span class="c"># position of the first match -&gt; 2</span>
+[n * 2 for n in nums]      <span class="c"># list comprehension -&gt; [10, 8, 6, 4, 2]</span>
+[n for n in nums if n % 2 == 0]   <span class="c"># comprehension with a filter -&gt; [4, 2]</span>
+first, *rest = nums        <span class="c"># unpack: first item + everything else</span>
+rest                       <span class="c"># -&gt; [4, 3, 2, 1]</span>
+for i, n in enumerate(nums):      <span class="c"># index AND value together</span>
+    pass
+list(zip([1, 2], ["a", "b"]))     <span class="c"># pair items up -&gt; [(1, 'a'), (2, 'b')]</span>
+nums.copy()                <span class="c"># shallow copy (nested items still shared) -&gt; [5, 4, 3, 2, 1]</span></code></pre>
+      </section>
+      <section class="card pycard" data-search="dictionaries  (key -&gt; value) user = {&quot;name&quot;: &quot;sree&quot;, &quot;age&quot;: 30}
+user[&quot;name&quot;]               # read (keyerror if the key is missing) -&gt; &#x27;sree&#x27;
+user.get(&quot;email&quot;)          # read, none if missing (no crash) -&gt; none
+user.get(&quot;email&quot;, &quot;n/a&quot;)   # read with a default -&gt; &#x27;n/a&#x27;
+user[&quot;city&quot;] = &quot;pune&quot;      # add a key, or change an existing one
+&quot;age&quot; in user              # does the key exist? -&gt; true
+user.pop(&quot;city&quot;)           # remove a key and return its value -&gt; &#x27;pune&#x27;
+list(user.keys())          # all keys -&gt; [&#x27;name&#x27;, &#x27;age&#x27;]
+list(user.values())        # all values -&gt; [&#x27;sree&#x27;, 30]
+list(user.items())         # (key, value) pairs -&gt; [(&#x27;name&#x27;, &#x27;sree&#x27;), (&#x27;age&#x27;, 30)]
+for key, value in user.items():   # loop over keys and values
+    pass
+user.update({&quot;age&quot;: 31})   # merge another dict in
+{**user, &quot;role&quot;: &quot;qa&quot;}     # copy plus an extra key -&gt; {&#x27;name&#x27;: &#x27;sree&#x27;, &#x27;age&#x27;: 31, &#x27;role&#x27;: &#x27;qa&#x27;}
+{k: v * 2 for k, v in {&quot;a&quot;: 1, &quot;b&quot;: 2}.items()}   # dict comprehension -&gt; {&#x27;a&#x27;: 2, &#x27;b&#x27;: 4}
+user.setdefault(&quot;tags&quot;, [])   # add the key only if it is missing">
+        <h3>Dictionaries  (key -&gt; value)</h3>
+        <pre><code>user = {"name": "Sree", "age": 30}
+user["name"]               <span class="c"># read (KeyError if the key is missing) -&gt; 'Sree'</span>
+user.get("email")          <span class="c"># read, None if missing (no crash) -&gt; None</span>
+user.get("email", "n/a")   <span class="c"># read with a default -&gt; 'n/a'</span>
+user["city"] = "Pune"      <span class="c"># add a key, or change an existing one</span>
+"age" in user              <span class="c"># does the KEY exist? -&gt; True</span>
+user.pop("city")           <span class="c"># remove a key and return its value -&gt; 'Pune'</span>
+list(user.keys())          <span class="c"># all keys -&gt; ['name', 'age']</span>
+list(user.values())        <span class="c"># all values -&gt; ['Sree', 30]</span>
+list(user.items())         <span class="c"># (key, value) pairs -&gt; [('name', 'Sree'), ('age', 30)]</span>
+for key, value in user.items():   <span class="c"># loop over keys and values</span>
+    pass
+user.update({"age": 31})   <span class="c"># merge another dict in</span>
+{**user, "role": "qa"}     <span class="c"># copy plus an extra key -&gt; {'name': 'Sree', 'age': 31, 'role': 'qa'}</span>
+{k: v * 2 for k, v in {"a": 1, "b": 2}.items()}   <span class="c"># dict comprehension -&gt; {'a': 2, 'b': 4}</span>
+user.setdefault("tags", [])   <span class="c"># add the key ONLY if it is missing</span></code></pre>
+      </section>
+      <section class="card pycard" data-search="tuples &amp; sets point = (3, 4)             # tuple: like a list, but cannot be changed
+x, y = point               # unpacking
+x                          # -&gt; 3
+tags = {&quot;a&quot;, &quot;b&quot;, &quot;a&quot;}     # set: unique items only, no order
+len(tags)                  # duplicates were dropped -&gt; 2
+tags.add(&quot;c&quot;)              # add an item
+{1, 2, 3} &amp; {2, 3, 4}      # intersection (in both) -&gt; {2, 3}
+{1, 2, 3} | {3, 4}         # union (in either) -&gt; {1, 2, 3, 4}
+{1, 2, 3} - {2}            # difference -&gt; {1, 3}
+list(set([1, 1, 2, 2]))    # quick way to remove duplicates -&gt; [1, 2]">
+        <h3>Tuples &amp; sets</h3>
+        <pre><code>point = (3, 4)             <span class="c"># tuple: like a list, but cannot be changed</span>
+x, y = point               <span class="c"># unpacking</span>
+x                          <span class="c"># -&gt; 3</span>
+tags = {"a", "b", "a"}     <span class="c"># set: unique items only, no order</span>
+len(tags)                  <span class="c"># duplicates were dropped -&gt; 2</span>
+tags.add("c")              <span class="c"># add an item</span>
+{1, 2, 3} &amp; {2, 3, 4}      <span class="c"># intersection (in both) -&gt; {2, 3}</span>
+{1, 2, 3} | {3, 4}         <span class="c"># union (in either) -&gt; {1, 2, 3, 4}</span>
+{1, 2, 3} - {2}            <span class="c"># difference -&gt; {1, 3}</span>
+list(set([1, 1, 2, 2]))    <span class="c"># quick way to remove duplicates -&gt; [1, 2]</span></code></pre>
+      </section>
+      <section class="card pycard" data-search="if / loops / match score = 72
+if score &gt;= 90:
+    grade = &quot;a&quot;
+elif score &gt;= 60:          # elif = &quot;else if&quot;
+    grade = &quot;b&quot;
+else:
+    grade = &quot;c&quot;
+grade                      # -&gt; &#x27;b&#x27;
+label = &quot;pass&quot; if score &gt;= 40 else &quot;fail&quot;    # one-line if/else
+label                      # -&gt; &#x27;pass&#x27;
+for i in range(3):         # 0, 1, 2   (the end is excluded)
+    pass
+for i in range(2, 10, 3):  # start, stop, step: 2, 5, 8
+    pass
+n = 0
+while n &lt; 3:               # repeat while the condition is true
+    n += 1
+    if n == 2:
+        continue           # skip to the next round
+    if n == 3:
+        break              # leave the loop
+n                          # -&gt; 3
+any(x &gt; 5 for x in [1, 9])    # is at least one true? -&gt; true
+all(x &gt; 0 for x in [1, 9])    # are all of them true? -&gt; true
+status = 404
+match status:              # like switch/case (python 3.10+)
+    case 200 | 201:
+        result = &quot;ok&quot;
+    case 404:
+        result = &quot;not found&quot;
+    case _:                # _ = anything else
+        result = &quot;other&quot;
+result                     # -&gt; &#x27;not found&#x27;">
+        <h3>if / loops / match</h3>
+        <pre><code>score = 72
+if score &gt;= 90:
+    grade = "A"
+elif score &gt;= 60:          <span class="c"># elif = "else if"</span>
+    grade = "B"
+else:
+    grade = "C"
+grade                      <span class="c"># -&gt; 'B'</span>
+label = "pass" if score &gt;= 40 else "fail"    <span class="c"># one-line if/else</span>
+label                      <span class="c"># -&gt; 'pass'</span>
+for i in range(3):         <span class="c"># 0, 1, 2   (the end is excluded)</span>
+    pass
+for i in range(2, 10, 3):  <span class="c"># start, stop, step: 2, 5, 8</span>
+    pass
+n = 0
+while n &lt; 3:               <span class="c"># repeat while the condition is true</span>
+    n += 1
+    if n == 2:
+        continue           <span class="c"># skip to the next round</span>
+    if n == 3:
+        break              <span class="c"># leave the loop</span>
+n                          <span class="c"># -&gt; 3</span>
+any(x &gt; 5 for x in [1, 9])    <span class="c"># is at least one true? -&gt; True</span>
+all(x &gt; 0 for x in [1, 9])    <span class="c"># are all of them true? -&gt; True</span>
+status = 404
+match status:              <span class="c"># like switch/case (Python 3.10+)</span>
+    case 200 | 201:
+        result = "ok"
+    case 404:
+        result = "not found"
+    case _:                <span class="c"># _ = anything else</span>
+        result = "other"
+result                     <span class="c"># -&gt; 'not found'</span></code></pre>
+      </section>
+      <section class="card pycard" data-search="functions def greet(name, greeting=&quot;hello&quot;):     # greeting has a default value
+    &quot;&quot;&quot;one-line description (a docstring).&quot;&quot;&quot;
+    return f&quot;{greeting}, {name}!&quot;
+
+greet(&quot;sree&quot;)                  # -&gt; &#x27;hello, sree!&#x27;
+greet(&quot;sree&quot;, greeting=&quot;hi&quot;)   # keyword argument -&gt; &#x27;hi, sree!&#x27;
+
+def total(*nums):              # *args: any number of positional arguments
+    return sum(nums)
+total(1, 2, 3)                 # -&gt; 6
+
+def show(**options):           # **kwargs: any number of key=value arguments
+    return options
+show(a=1, b=2)                 # -&gt; {&#x27;a&#x27;: 1, &#x27;b&#x27;: 2}
+
+def min_max(items):
+    return min(items), max(items)      # returns a tuple
+low, high = min_max([4, 2, 9])         # unpack the result
+high                           # -&gt; 9
+
+def add_tag(tag, tags=none):   # never use tags=[]: that list is shared between calls
+    if tags is none:
+        tags = []
+    tags.append(tag)
+    return tags
+
+double = lambda x: x * 2       # small unnamed function
+double(5)                      # -&gt; 10
+sorted([&quot;bb&quot;, &quot;a&quot;, &quot;ccc&quot;], key=len)    # sort by a function -&gt; [&#x27;a&#x27;, &#x27;bb&#x27;, &#x27;ccc&#x27;]
+list(map(str.upper, [&quot;a&quot;, &quot;b&quot;]))       # apply to every item -&gt; [&#x27;a&#x27;, &#x27;b&#x27;]
+list(filter(none, [0, 1, &quot;&quot;, &quot;x&quot;]))    # keep only truthy items -&gt; [1, &#x27;x&#x27;]">
+        <h3>Functions</h3>
+        <pre><code>def greet(name, greeting="Hello"):     <span class="c"># greeting has a default value</span>
+    """One-line description (a docstring)."""
+    return f"{greeting}, {name}!"
+
+greet("Sree")                  <span class="c"># -&gt; 'Hello, Sree!'</span>
+greet("Sree", greeting="Hi")   <span class="c"># keyword argument -&gt; 'Hi, Sree!'</span>
+
+def total(*nums):              <span class="c"># *args: any number of positional arguments</span>
+    return sum(nums)
+total(1, 2, 3)                 <span class="c"># -&gt; 6</span>
+
+def show(**options):           <span class="c"># **kwargs: any number of key=value arguments</span>
+    return options
+show(a=1, b=2)                 <span class="c"># -&gt; {'a': 1, 'b': 2}</span>
+
+def min_max(items):
+    return min(items), max(items)      <span class="c"># returns a tuple</span>
+low, high = min_max([4, 2, 9])         <span class="c"># unpack the result</span>
+high                           <span class="c"># -&gt; 9</span>
+
+def add_tag(tag, tags=None):   <span class="c"># NEVER use tags=[]: that list is shared between calls</span>
+    if tags is None:
+        tags = []
+    tags.append(tag)
+    return tags
+
+double = lambda x: x * 2       <span class="c"># small unnamed function</span>
+double(5)                      <span class="c"># -&gt; 10</span>
+sorted(["bb", "a", "ccc"], key=len)    <span class="c"># sort by a function -&gt; ['a', 'bb', 'ccc']</span>
+list(map(str.upper, ["a", "b"]))       <span class="c"># apply to every item -&gt; ['A', 'B']</span>
+list(filter(None, [0, 1, "", "x"]))    <span class="c"># keep only truthy items -&gt; [1, 'x']</span></code></pre>
+      </section>
+      <section class="card pycard" data-search="classes class ticket:
+    count = 0                       # class attribute: shared by all tickets
+
+    def __init__(self, title):      # runs when you create an object
+        self.title = title          # instance attribute: one per object
+        ticket.count += 1
+
+    def __repr__(self):             # how the object prints
+        return f&quot;ticket({self.title!r})&quot;
+
+    @property
+    def short(self):                # use like an attribute: t.short
+        return self.title[:5]
+
+    @classmethod
+    def from_text(cls, text):       # alternative constructor
+        return cls(text.strip())
+
+    @staticmethod
+    def is_valid(title):            # plain function that lives inside the class
+        return bool(title)
+
+t = ticket(&quot;login crash&quot;)
+t                                   # -&gt; ticket(&#x27;login crash&#x27;)
+t.short                             # -&gt; &#x27;login&#x27;
+ticket.from_text(&quot;  hi  &quot;)          # -&gt; ticket(&#x27;hi&#x27;)
+ticket.count                        # -&gt; 2
+ticket.is_valid(&quot;&quot;)                 # -&gt; false
+
+class bug(ticket):                  # inheritance: bug gets everything ticket has
+    def __init__(self, title):
+        super().__init__(title)     # run the parent&#x27;s __init__ first
+        self.severity = &quot;high&quot;
+bug(&quot;x&quot;).severity                   # -&gt; &#x27;high&#x27;">
+        <h3>Classes</h3>
+        <pre><code>class Ticket:
+    count = 0                       <span class="c"># class attribute: SHARED by all tickets</span>
+
+    def __init__(self, title):      <span class="c"># runs when you create an object</span>
+        self.title = title          <span class="c"># instance attribute: one per object</span>
+        Ticket.count += 1
+
+    def __repr__(self):             <span class="c"># how the object prints</span>
+        return f"Ticket({self.title!r})"
+
+    @property
+    def short(self):                <span class="c"># use like an attribute: t.short</span>
+        return self.title[:5]
+
+    @classmethod
+    def from_text(cls, text):       <span class="c"># alternative constructor</span>
+        return cls(text.strip())
+
+    @staticmethod
+    def is_valid(title):            <span class="c"># plain function that lives inside the class</span>
+        return bool(title)
+
+t = Ticket("Login crash")
+t                                   <span class="c"># -&gt; Ticket('Login crash')</span>
+t.short                             <span class="c"># -&gt; 'Login'</span>
+Ticket.from_text("  Hi  ")          <span class="c"># -&gt; Ticket('Hi')</span>
+Ticket.count                        <span class="c"># -&gt; 2</span>
+Ticket.is_valid("")                 <span class="c"># -&gt; False</span>
+
+class Bug(Ticket):                  <span class="c"># inheritance: Bug gets everything Ticket has</span>
+    def __init__(self, title):
+        super().__init__(title)     <span class="c"># run the parent's __init__ first</span>
+        self.severity = "high"
+Bug("x").severity                   <span class="c"># -&gt; 'high'</span></code></pre>
+      </section>
+      <section class="card pycard" data-search="dataclasses from dataclasses import dataclass, field
+
+@dataclass                          # writes __init__, __repr__ and __eq__ for you
+class point:
+    x: int
+    y: int = 0                      # default value
+    tags: list = field(default_factory=list)   # safe default for a list/dict
+
+point(1)                            # -&gt; point(x=1, y=0, tags=[])
+point(1, 2) == point(1, 2)          # compares the fields -&gt; true">
+        <h3>Dataclasses</h3>
+        <pre><code>from dataclasses import dataclass, field
+
+@dataclass                          <span class="c"># writes __init__, __repr__ and __eq__ for you</span>
+class Point:
+    x: int
+    y: int = 0                      <span class="c"># default value</span>
+    tags: list = field(default_factory=list)   <span class="c"># safe default for a list/dict</span>
+
+Point(1)                            <span class="c"># -&gt; Point(x=1, y=0, tags=[])</span>
+Point(1, 2) == Point(1, 2)          <span class="c"># compares the fields -&gt; True</span></code></pre>
+      </section>
+      <section class="card pycard" data-search="errors: try / except / raise try:
+    value = int(&quot;abc&quot;)              # code that might fail
+except valueerror as e:             # catch one specific error (never a bare `except:`)
+    value = none
+else:
+    pass                            # runs only if there was no error
+finally:
+    pass                            # always runs (cleanup)
+value                               # -&gt; none
+
+try:
+    raise valueerror(&quot;bad input&quot;)   # raise your own error
+except valueerror as e:
+    message = str(e)
+message                             # -&gt; &#x27;bad input&#x27;
+
+class apperror(exception):          # your own error type
+    pass
+
+assert 1 + 1 == 2, &quot;shown if the condition is false&quot;
+
+# common errors:
+# valueerror      right type, wrong value        int(&quot;abc&quot;)
+# typeerror       wrong type                     &quot;a&quot; + 1
+# keyerror        dict key missing               {}[&quot;x&quot;]
+# indexerror      list index out of range        [][0]
+# attributeerror  no such attribute              none.upper()">
+        <h3>Errors: try / except / raise</h3>
+        <pre><code>try:
+    value = int("abc")              <span class="c"># code that might fail</span>
+except ValueError as e:             <span class="c"># catch ONE specific error (never a bare `except:`)</span>
+    value = None
+else:
+    pass                            <span class="c"># runs only if there was NO error</span>
+finally:
+    pass                            <span class="c"># always runs (cleanup)</span>
+value                               <span class="c"># -&gt; None</span>
+
+try:
+    raise ValueError("bad input")   <span class="c"># raise your own error</span>
+except ValueError as e:
+    message = str(e)
+message                             <span class="c"># -&gt; 'bad input'</span>
+
+class AppError(Exception):          <span class="c"># your own error type</span>
+    pass
+
+assert 1 + 1 == 2, "shown if the condition is False"
+
+<span class="c"># Common errors:</span>
+<span class="c"># ValueError      right type, wrong value        int("abc")</span>
+<span class="c"># TypeError       wrong type                     "a" + 1</span>
+<span class="c"># KeyError        dict key missing               {}["x"]</span>
+<span class="c"># IndexError      list index out of range        [][0]</span>
+<span class="c"># AttributeError  no such attribute              None.upper()</span></code></pre>
+      </section>
+      <section class="card pycard" data-search="files, paths &amp; json from pathlib import path
+import json
+
+path = path(&quot;notes.txt&quot;)
+path.write_text(&quot;hello&quot;)           # create / overwrite a text file
+path.read_text()                   # read the whole file -&gt; &#x27;hello&#x27;
+path.exists()                      # does it exist? -&gt; true
+path.name                          # -&gt; &#x27;notes.txt&#x27;
+path.stem                          # name without extension -&gt; &#x27;notes&#x27;
+path.suffix                        # -&gt; &#x27;.txt&#x27;
+str(path(&quot;a&quot;) / &quot;b&quot; / &quot;c.txt&quot;)     # join paths with / -&gt; &#x27;a/b/c.txt&#x27;
+
+with open(&quot;notes.txt&quot;, &quot;a&quot;) as f:  # &quot;r&quot; read, &quot;w&quot; overwrite, &quot;a&quot; append
+    f.write(&quot;\nmore&quot;)              # the file closes itself at the end of `with`
+path.read_text()                   # -&gt; &#x27;hello\nmore&#x27;
+with open(&quot;notes.txt&quot;) as f:
+    for line in f:                 # read line by line
+        print(line.strip())
+
+json.dumps({&quot;a&quot;: 1})               # dict to json text -&gt; &#x27;{&quot;a&quot;: 1}&#x27;
+json.loads(&#x27;{&quot;a&quot;: 1}&#x27;)             # json text to dict -&gt; {&#x27;a&#x27;: 1}
+data = {&quot;user&quot;: &quot;sree&quot;, &quot;tags&quot;: [&quot;qa&quot;, &quot;ai&quot;]}
+with open(&quot;data.json&quot;, &quot;w&quot;) as f:  # write json to a file
+    json.dump(data, f, indent=2)
+with open(&quot;data.json&quot;) as f:       # read it back
+    loaded = json.load(f)
+loaded == data                     # -&gt; true
+path.unlink()                      # delete the file">
+        <h3>Files, paths &amp; JSON</h3>
+        <pre><code>from pathlib import Path
+import json
+
+path = Path("notes.txt")
+path.write_text("hello")           <span class="c"># create / overwrite a text file</span>
+path.read_text()                   <span class="c"># read the whole file -&gt; 'hello'</span>
+path.exists()                      <span class="c"># does it exist? -&gt; True</span>
+path.name                          <span class="c"># -&gt; 'notes.txt'</span>
+path.stem                          <span class="c"># name without extension -&gt; 'notes'</span>
+path.suffix                        <span class="c"># -&gt; '.txt'</span>
+str(Path("a") / "b" / "c.txt")     <span class="c"># join paths with / -&gt; 'a/b/c.txt'</span>
+
+with open("notes.txt", "a") as f:  <span class="c"># "r" read, "w" overwrite, "a" append</span>
+    f.write("\nmore")              <span class="c"># the file closes itself at the end of `with`</span>
+path.read_text()                   <span class="c"># -&gt; 'hello\nmore'</span>
+with open("notes.txt") as f:
+    for line in f:                 <span class="c"># read line by line</span>
+        print(line.strip())
+
+json.dumps({"a": 1})               <span class="c"># dict to JSON text -&gt; '{"a": 1}'</span>
+json.loads('{"a": 1}')             <span class="c"># JSON text to dict -&gt; {'a': 1}</span>
+data = {"user": "Sree", "tags": ["qa", "ai"]}
+with open("data.json", "w") as f:  <span class="c"># write JSON to a file</span>
+    json.dump(data, f, indent=2)
+with open("data.json") as f:       <span class="c"># read it back</span>
+    loaded = json.load(f)
+loaded == data                     <span class="c"># -&gt; True</span>
+path.unlink()                      <span class="c"># delete the file</span></code></pre>
+      </section>
+      <section class="card pycard" data-search="imports, scripts &amp; the os import os                          # use as os.getcwd()
+from pathlib import path           # import one name
+import datetime as dt              # import with a shorter alias
+import sys
+
+os.getcwd()                        # current folder
+os.listdir(&quot;.&quot;)                    # names of files in a folder
+os.environ.get(&quot;home&quot;)             # environment variable (none if missing)
+sys.argv                           # command-line arguments: [&quot;script.py&quot;, &quot;arg1&quot;, ...]
+
+def main():
+    print(&quot;running&quot;)
+
+if __name__ == &quot;__main__&quot;:         # true only when you run this file directly
+    main()                         # not when another file imports it">
+        <h3>Imports, scripts &amp; the OS</h3>
+        <pre><code>import os                          <span class="c"># use as os.getcwd()</span>
+from pathlib import Path           <span class="c"># import one name</span>
+import datetime as dt              <span class="c"># import with a shorter alias</span>
+import sys
+
+os.getcwd()                        <span class="c"># current folder</span>
+os.listdir(".")                    <span class="c"># names of files in a folder</span>
+os.environ.get("HOME")             <span class="c"># environment variable (None if missing)</span>
+sys.argv                           <span class="c"># command-line arguments: ["script.py", "arg1", ...]</span>
+
+def main():
+    print("running")
+
+if __name__ == "__main__":         <span class="c"># True only when you RUN this file directly</span>
+    main()                         <span class="c"># not when another file imports it</span></code></pre>
+      </section>
+      <section class="card pycard" data-search="handy standard library from datetime import datetime, timedelta
+import math, random, time
+from collections import counter, defaultdict
+
+datetime(2026, 10, 3).strftime(&quot;%d %b %y&quot;)    # format a date -&gt; &#x27;03 oct 2026&#x27;
+datetime(2026, 10, 3) + timedelta(days=7)     # date maths -&gt; datetime.datetime(2026, 10, 10, 0, 0)
+datetime.fromisoformat(&quot;2026-10-03&quot;)          # parse text -&gt; datetime.datetime(2026, 10, 3, 0, 0)
+datetime.now()                     # current local date and time
+math.sqrt(16)                      # -&gt; 4.0
+math.ceil(2.1)                     # round up -&gt; 3
+round(3.14159, 2)                  # -&gt; 3.14
+random.choice([&quot;a&quot;, &quot;b&quot;, &quot;c&quot;])     # one random item
+random.randint(1, 6)               # random whole number, both ends included
+time.sleep(0.1)                    # pause (seconds). in async code use asyncio.sleep
+counter(&quot;banana&quot;)                  # count items -&gt; counter({&#x27;a&#x27;: 3, &#x27;n&#x27;: 2, &#x27;b&#x27;: 1})
+counter(&quot;banana&quot;).most_common(1)   # top item -&gt; [(&#x27;a&#x27;, 3)]
+groups = defaultdict(list)         # dict that creates missing values for you
+groups[&quot;x&quot;].append(1)
+dict(groups)                       # -&gt; {&#x27;x&#x27;: [1]}">
+        <h3>Handy standard library</h3>
+        <pre><code>from datetime import datetime, timedelta
+import math, random, time
+from collections import Counter, defaultdict
+
+datetime(2026, 10, 3).strftime("%d %b %Y")    <span class="c"># format a date -&gt; '03 Oct 2026'</span>
+datetime(2026, 10, 3) + timedelta(days=7)     <span class="c"># date maths -&gt; datetime.datetime(2026, 10, 10, 0, 0)</span>
+datetime.fromisoformat("2026-10-03")          <span class="c"># parse text -&gt; datetime.datetime(2026, 10, 3, 0, 0)</span>
+datetime.now()                     <span class="c"># current local date and time</span>
+math.sqrt(16)                      <span class="c"># -&gt; 4.0</span>
+math.ceil(2.1)                     <span class="c"># round up -&gt; 3</span>
+round(3.14159, 2)                  <span class="c"># -&gt; 3.14</span>
+random.choice(["a", "b", "c"])     <span class="c"># one random item</span>
+random.randint(1, 6)               <span class="c"># random whole number, both ends included</span>
+time.sleep(0.1)                    <span class="c"># pause (seconds). In async code use asyncio.sleep</span>
+Counter("banana")                  <span class="c"># count items -&gt; Counter({'a': 3, 'n': 2, 'b': 1})</span>
+Counter("banana").most_common(1)   <span class="c"># top item -&gt; [('a', 3)]</span>
+groups = defaultdict(list)         <span class="c"># dict that creates missing values for you</span>
+groups["x"].append(1)
+dict(groups)                       <span class="c"># -&gt; {'x': [1]}</span></code></pre>
+      </section>
+      <section class="card pycard" data-search="regex (re) import re
+re.search(r&quot;\d+&quot;, &quot;order 66 shipped&quot;).group()   # first match -&gt; &#x27;66&#x27;
+re.findall(r&quot;\d+&quot;, &quot;a1 b22 c333&quot;)               # all matches -&gt; [&#x27;1&#x27;, &#x27;22&#x27;, &#x27;333&#x27;]
+re.sub(r&quot;\s+&quot;, &quot; &quot;, &quot;too   many    spaces&quot;)     # replace -&gt; &#x27;too many spaces&#x27;
+re.match(r&quot;^inv-\d+$&quot;, &quot;inv-42&quot;) is not none    # matches from the start? -&gt; true
+re.split(r&quot;[,;]&quot;, &quot;a,b;c&quot;)                      # split on several separators -&gt; [&#x27;a&#x27;, &#x27;b&#x27;, &#x27;c&#x27;]
+m = re.search(r&quot;(?p&lt;year&gt;\d{4})-(?p&lt;month&gt;\d{2})&quot;, &quot;on 2026-10-03&quot;)
+m.group(&quot;year&quot;)                                 # named group -&gt; &#x27;2026&#x27;
+
+# cheat sheet:  \d digit   \w letter/digit/_   \s space   .  any character
+#               *  0 or more   +  1 or more   ?  optional   ^ start   $ end
+#               [abc] one of these   (...) group   {4} exactly 4 times
+# always write patterns as raw strings: r&quot;...&quot;">
+        <h3>Regex (re)</h3>
+        <pre><code>import re
+re.search(r"\d+", "order 66 shipped").group()   <span class="c"># first match -&gt; '66'</span>
+re.findall(r"\d+", "a1 b22 c333")               <span class="c"># all matches -&gt; ['1', '22', '333']</span>
+re.sub(r"\s+", " ", "too   many    spaces")     <span class="c"># replace -&gt; 'too many spaces'</span>
+re.match(r"^INV-\d+$", "INV-42") is not None    <span class="c"># matches from the start? -&gt; True</span>
+re.split(r"[,;]", "a,b;c")                      <span class="c"># split on several separators -&gt; ['a', 'b', 'c']</span>
+m = re.search(r"(?P&lt;year&gt;\d{4})-(?P&lt;month&gt;\d{2})", "on 2026-10-03")
+m.group("year")                                 <span class="c"># named group -&gt; '2026'</span>
+
+<span class="c"># Cheat sheet:  \d digit   \w letter/digit/_   \s space   .  any character</span>
+<span class="c">#               *  0 or more   +  1 or more   ?  optional   ^ start   $ end</span>
+<span class="c">#               [abc] one of these   (...) group   {4} exactly 4 times</span>
+<span class="c"># Always write patterns as raw strings: r"..."</span></code></pre>
+      </section>
+      <section class="card pycard" data-search="comprehensions &amp; generators [n * n for n in range(5)]                  # list comprehension -&gt; [0, 1, 4, 9, 16]
+{n for n in range(10) if n % 2 == 0}       # set comprehension -&gt; {0, 2, 4, 6, 8}
+{w: len(w) for w in [&quot;a&quot;, &quot;bb&quot;]}           # dict comprehension -&gt; {&#x27;a&#x27;: 1, &#x27;bb&#x27;: 2}
+sum(n * n for n in range(5))               # generator expression (no list built) -&gt; 30
+
+def count_up(limit):
+    n = 0
+    while n &lt; limit:
+        yield n                            # pause here and hand back one value at a time
+        n += 1
+list(count_up(3))                          # -&gt; [0, 1, 2]
+next(iter([10, 20]))                       # take the first value of an iterator -&gt; 10">
+        <h3>Comprehensions &amp; generators</h3>
+        <pre><code>[n * n for n in range(5)]                  <span class="c"># list comprehension -&gt; [0, 1, 4, 9, 16]</span>
+{n for n in range(10) if n % 2 == 0}       <span class="c"># set comprehension -&gt; {0, 2, 4, 6, 8}</span>
+{w: len(w) for w in ["a", "bb"]}           <span class="c"># dict comprehension -&gt; {'a': 1, 'bb': 2}</span>
+sum(n * n for n in range(5))               <span class="c"># generator expression (no list built) -&gt; 30</span>
+
+def count_up(limit):
+    n = 0
+    while n &lt; limit:
+        yield n                            <span class="c"># pause here and hand back ONE value at a time</span>
+        n += 1
+list(count_up(3))                          <span class="c"># -&gt; [0, 1, 2]</span>
+next(iter([10, 20]))                       <span class="c"># take the first value of an iterator -&gt; 10</span></code></pre>
+      </section>
+      <section class="card pycard" data-search="decorators &amp; context managers import functools, time
+from contextlib import contextmanager
+
+def timed(func):                           # a decorator: takes a function, returns a new one
+    @functools.wraps(func)                 # keep the original name and docstring
+    def wrapper(*args, **kwargs):
+        start = time.perf_counter()
+        result = func(*args, **kwargs)
+        print(f&quot;{func.__name__} took {time.perf_counter() - start:.3f}s&quot;)
+        return result
+    return wrapper
+
+@timed                                     # same as: slow = timed(slow)
+def slow():
+    return &quot;done&quot;
+slow()                                     # -&gt; &#x27;done&#x27;
+
+@contextmanager                            # makes a function usable with `with`
+def opened(name):
+    print(&quot;setup&quot;)
+    yield name                             # the body of the `with` runs here
+    print(&quot;cleanup&quot;)                       # runs afterwards, even after an error
+with opened(&quot;db&quot;) as conn:
+    pass">
+        <h3>Decorators &amp; context managers</h3>
+        <pre><code>import functools, time
+from contextlib import contextmanager
+
+def timed(func):                           <span class="c"># a decorator: takes a function, returns a new one</span>
+    @functools.wraps(func)                 <span class="c"># keep the original name and docstring</span>
+    def wrapper(*args, **kwargs):
+        start = time.perf_counter()
+        result = func(*args, **kwargs)
+        print(f"{func.__name__} took {time.perf_counter() - start:.3f}s")
+        return result
+    return wrapper
+
+@timed                                     <span class="c"># same as: slow = timed(slow)</span>
+def slow():
+    return "done"
+slow()                                     <span class="c"># -&gt; 'done'</span>
+
+@contextmanager                            <span class="c"># makes a function usable with `with`</span>
+def opened(name):
+    print("setup")
+    yield name                             <span class="c"># the body of the `with` runs here</span>
+    print("cleanup")                       <span class="c"># runs afterwards, even after an error</span>
+with opened("db") as conn:
+    pass</code></pre>
+      </section>
+      <section class="card pycard" data-search="type hints def f(a: int, b: str = &quot;x&quot;) -&gt; bool: ...   # argument and return types (hints only!)
+names: list[str] = []                      # a list of strings
+scores: dict[str, int] = {}                # str keys, int values
+maybe: str | none = none                   # a str or none
+
+from typing import callable, literal, typeddict
+handler: callable[[int], str]              # a function taking an int, returning a str
+mode: literal[&quot;r&quot;, &quot;w&quot;]                    # only these exact values
+
+class row(typeddict):                      # a dict with known keys
+    id: int
+    name: str
+
+# python does not enforce hints. tools like pydantic, mypy and your editor use them.">
+        <h3>Type hints</h3>
+        <pre><code>def f(a: int, b: str = "x") -&gt; bool: ...   <span class="c"># argument and return types (hints only!)</span>
+names: list[str] = []                      <span class="c"># a list of strings</span>
+scores: dict[str, int] = {}                <span class="c"># str keys, int values</span>
+maybe: str | None = None                   <span class="c"># a str OR None</span>
+
+from typing import Callable, Literal, TypedDict
+handler: Callable[[int], str]              <span class="c"># a function taking an int, returning a str</span>
+mode: Literal["r", "w"]                    <span class="c"># only these exact values</span>
+
+class Row(TypedDict):                      <span class="c"># a dict with known keys</span>
+    id: int
+    name: str
+
+<span class="c"># Python does NOT enforce hints. Tools like Pydantic, mypy and your editor use them.</span></code></pre>
+      </section>
+      <section class="card pycard" data-search="debugging &amp; exploring print(x)                    # quick look
+print(repr(x))              # unambiguous: shows quotes and \n
+type(x)                     # what is it?
+dir(x)                      # list its attributes and methods
+help(str.split)             # built-in documentation
+breakpoint()                # stop here and open the debugger (pdb)
+
+# inside pdb:  n = next line   s = step into   c = continue   p x = print x   q = quit
+
+import traceback
+traceback.print_exc()       # print the last error&#x27;s stack trace (inside an except block)">
+        <h3>Debugging &amp; exploring</h3>
+        <pre><code>print(x)                    <span class="c"># quick look</span>
+print(repr(x))              <span class="c"># unambiguous: shows quotes and \n</span>
+type(x)                     <span class="c"># what is it?</span>
+dir(x)                      <span class="c"># list its attributes and methods</span>
+help(str.split)             <span class="c"># built-in documentation</span>
+breakpoint()                <span class="c"># stop here and open the debugger (pdb)</span>
+
+<span class="c"># Inside pdb:  n = next line   s = step into   c = continue   p x = print x   q = quit</span>
+
+import traceback
+traceback.print_exc()       <span class="c"># print the last error's stack trace (inside an except block)</span></code></pre>
+      </section>
+      <section class="card pycard" data-search="terminal: python, pip, venv, uv python3 --version                  # which python is this?
+python3 script.py arg1             # run a file (arg1 arrives in sys.argv[1])
+python3 -c &quot;print(2 + 2)&quot;          # run one line of code
+python3 -m pytest -v               # run a module as a program
+python3 -m http.server 8000        # serve this folder at http://localhost:8000
+python3 -m json.tool data.json     # pretty-print a json file
+
+python3 -m venv .venv              # create a virtual environment (private packages)
+source .venv/bin/activate          # turn it on (macos/linux); `deactivate` turns it off
+pip install requests               # install a package
+pip install -r requirements.txt    # install everything in a file
+pip freeze &gt; requirements.txt      # save the installed versions
+pip list                           # what is installed?
+
+# uv: the faster tool used in this course
+uv init myproject                  # new project
+uv add httpx                       # add a dependency
+uv sync                            # install from the lockfile
+uv run python app.py               # run inside the project environment">
+        <h3>Terminal: python, pip, venv, uv</h3>
+        <pre><code>python3 --version                  <span class="c"># which Python is this?</span>
+python3 script.py arg1             <span class="c"># run a file (arg1 arrives in sys.argv[1])</span>
+python3 -c "print(2 + 2)"          <span class="c"># run one line of code</span>
+python3 -m pytest -v               <span class="c"># run a module as a program</span>
+python3 -m http.server 8000        <span class="c"># serve this folder at http://localhost:8000</span>
+python3 -m json.tool data.json     <span class="c"># pretty-print a JSON file</span>
+
+python3 -m venv .venv              <span class="c"># create a virtual environment (private packages)</span>
+source .venv/bin/activate          <span class="c"># turn it on (macOS/Linux); `deactivate` turns it off</span>
+pip install requests               <span class="c"># install a package</span>
+pip install -r requirements.txt    <span class="c"># install everything in a file</span>
+pip freeze &gt; requirements.txt      <span class="c"># save the installed versions</span>
+pip list                           <span class="c"># what is installed?</span>
+
+<span class="c"># uv: the faster tool used in this course</span>
+uv init myproject                  <span class="c"># new project</span>
+uv add httpx                       <span class="c"># add a dependency</span>
+uv sync                            <span class="c"># install from the lockfile</span>
+uv run python app.py               <span class="c"># run inside the project environment</span></code></pre>
+      </section>
+      <section class="card pycard" data-search="pytest quick reference import pytest
+
+def test_add():
+    assert 1 + 1 == 2                      # a failing assert = a failing test
+
+def test_error():
+    with pytest.raises(valueerror):        # passes only if valueerror is raised
+        int(&quot;abc&quot;)
+
+@pytest.mark.parametrize(&quot;n, expected&quot;, [(1, 2), (2, 4)])   # one test, many inputs
+def test_double(n, expected):
+    assert n * 2 == expected
+
+@pytest.fixture                            # shared setup; a test asks for it by name
+def user():
+    return {&quot;name&quot;: &quot;sree&quot;}
+
+def test_user(user):
+    assert user[&quot;name&quot;] == &quot;sree&quot;
+
+# terminal:  pytest -v  (verbose)   -x  (stop at first failure)   -k name  (match test names)">
+        <h3>pytest quick reference</h3>
+        <pre><code>import pytest
+
+def test_add():
+    assert 1 + 1 == 2                      <span class="c"># a failing assert = a failing test</span>
+
+def test_error():
+    with pytest.raises(ValueError):        <span class="c"># passes only if ValueError is raised</span>
+        int("abc")
+
+@pytest.mark.parametrize("n, expected", [(1, 2), (2, 4)])   <span class="c"># one test, many inputs</span>
+def test_double(n, expected):
+    assert n * 2 == expected
+
+@pytest.fixture                            <span class="c"># shared setup; a test asks for it by name</span>
+def user():
+    return {"name": "Sree"}
+
+def test_user(user):
+    assert user["name"] == "Sree"
+
+<span class="c"># Terminal:  pytest -v  (verbose)   -x  (stop at first failure)   -k name  (match test names)</span></code></pre>
+      </section>
+      <section class="card pycard" data-search="idioms &amp; gotchas a, b = 1, 2
+a, b = b, a                    # swap two variables without a temp
+a                              # -&gt; 2
+y = &quot;&quot;
+x = y or &quot;default&quot;             # `or` picks the first truthy value
+x                              # -&gt; &#x27;default&#x27;
+items = []
+if not items:                  # empty list / str / dict / 0 / none are all falsy
+    msg = &quot;empty&quot;
+msg                            # -&gt; &#x27;empty&#x27;
+value = none
+value is none                  # compare to none with `is`, not == -&gt; true
+parts = [&quot;a&quot;, &quot;b&quot;, &quot;c&quot;]
+&quot;&quot;.join(parts)                 # build text with join, not += in a loop -&gt; &#x27;abc&#x27;
+print(*parts, sep=&quot;, &quot;)        # `*` unpacks a list into arguments -&gt; a, b, c
+for i, p in enumerate(parts, start=1):   # prefer this over range(len(parts))
+    pass
+
+a = [1, 2]
+b = a                          # b is another name for the same list, not a copy
+b.append(3)
+a                              # a changed too! -&gt; [1, 2, 3]
+c = a.copy()                   # a real (shallow) copy
+c.append(4)
+a                              # unchanged -&gt; [1, 2, 3]">
+        <h3>Idioms &amp; gotchas</h3>
+        <pre><code>a, b = 1, 2
+a, b = b, a                    <span class="c"># swap two variables without a temp</span>
+a                              <span class="c"># -&gt; 2</span>
+y = ""
+x = y or "default"             <span class="c"># `or` picks the first truthy value</span>
+x                              <span class="c"># -&gt; 'default'</span>
+items = []
+if not items:                  <span class="c"># empty list / str / dict / 0 / None are all falsy</span>
+    msg = "empty"
+msg                            <span class="c"># -&gt; 'empty'</span>
+value = None
+value is None                  <span class="c"># compare to None with `is`, not == -&gt; True</span>
+parts = ["a", "b", "c"]
+"".join(parts)                 <span class="c"># build text with join, not += in a loop -&gt; 'abc'</span>
+print(*parts, sep=", ")        <span class="c"># `*` unpacks a list into arguments -&gt; a, b, c</span>
+for i, p in enumerate(parts, start=1):   <span class="c"># prefer this over range(len(parts))</span>
+    pass
+
+a = [1, 2]
+b = a                          <span class="c"># b is another NAME for the SAME list, not a copy</span>
+b.append(3)
+a                              <span class="c"># a changed too! -&gt; [1, 2, 3]</span>
+c = a.copy()                   <span class="c"># a real (shallow) copy</span>
+c.append(4)
+a                              <span class="c"># unchanged -&gt; [1, 2, 3]</span></code></pre>
+      </section>
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  var root = document.documentElement;
+  root.classList.add('js');
+  var tabs = Array.prototype.slice.call(document.querySelectorAll('[role=tab]'));
+  var panels = {notes: document.getElementById('panel-notes'), python: document.getElementById('panel-python')};
+
+  function show(name, focus) {
+    tabs.forEach(function (t) {
+      var on = t.getAttribute('data-tab') === name;
+      t.setAttribute('aria-selected', on ? 'true' : 'false');
+      t.tabIndex = on ? 0 : -1;
+      if (on && focus) t.focus();
+    });
+    Object.keys(panels).forEach(function (k) { panels[k].hidden = (k !== name); });
+    try { history.replaceState(null, '', '#' + name); } catch (e) {}
+  }
+
+  tabs.forEach(function (t, i) {
+    t.addEventListener('click', function () { show(t.getAttribute('data-tab')); });
+    t.addEventListener('keydown', function (e) {
+      var next = null;
+      if (e.key === 'ArrowRight') next = tabs[(i + 1) % tabs.length];
+      if (e.key === 'ArrowLeft') next = tabs[(i - 1 + tabs.length) % tabs.length];
+      if (next) { e.preventDefault(); show(next.getAttribute('data-tab'), true); }
+    });
+  });
+  show(location.hash === '#python' ? 'python' : 'notes');
+
+  var input = document.getElementById('filter');
+  var cards = Array.prototype.slice.call(document.querySelectorAll('.pycard'));
+  var none = document.getElementById('none');
+  input.addEventListener('input', function () {
+    var q = input.value.trim().toLowerCase(), shown = 0;
+    cards.forEach(function (c) {
+      var ok = !q || c.getAttribute('data-search').indexOf(q) !== -1;
+      c.hidden = !ok;
+      if (ok) shown++;
+    });
+    none.style.display = shown ? 'none' : 'block';
+  });
+})();
+</script>
+</body>
+</html>

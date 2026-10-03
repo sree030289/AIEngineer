@@ -7,12 +7,28 @@ dependencies = [
     "fastapi[standard]>=0.141.1",
     "httpx>=0.28.1",
     "pydantic>=2.13.5",
+    "pydantic-settings>=2.15.0",
     "regex>=2026.9.29",
 ]
 
 [dependency-groups]
-dev = ["pytest>=8"]
+dev = [
+    "pytest>=8",
+    "ruff>=0.16.10",
+]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["."]
+
+[tool.ruff]
+line-length = 100
+
+[tool.ruff.lint]
+# E = style errors (incl. E722 bare `except:`), F = real bugs (unused/undefined names), I = import order
+select = ["E", "F", "I"]
+
+[tool.ruff.lint.per-file-ignores]
+"exercises/*" = ["F401"]       # stubs import names you'll use once you've written the code
+"tests/conftest.py" = ["F401"]  # same: Day 10 stub fixtures
+"lessons/*" = ["E501"]          # demo scripts have long print() lines on purpose
